@@ -26,4 +26,4 @@ def index():
 # Set webhook (only once, not on every start)
 @app.before_first_request
 def set_webhook():
-    bot.set_webhook(f"https://<your_render_url>/{TOKEN}")
+    bot.set_webhook(f"https://<https://veerninja.onrender.com>/{TOKEN}")
