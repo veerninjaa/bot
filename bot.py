@@ -1,23 +1,29 @@
-from telegram.ext import Updater, CommandHandler
-import logging
+from flask import Flask, request
+from telegram import Bot, Update
+from telegram.ext import Dispatcher, CommandHandler
 
-# Replace this with your bot token
 TOKEN = "7742866090:AAGzLvBk8hnfSllLEnPcobBAUkhaEkOM2j8"
+bot = Bot(token=TOKEN)
+app = Flask(__name__)
+dispatcher = Dispatcher(bot, None, use_context=True)
 
-logging.basicConfig(level=logging.INFO)
-
+# Example handler
 def start(update, context):
-    update.message.reply_text(
-        "🎯 Welcome to the Phishing Simulator!\n\nClick below to simulate a login page:\n"
-        "https://veerninja-bot.onrender.com"
-    )
+    update.message.reply_text("Hello from webhook!")
 
-def main():
-    updater = Updater(TOKEN, use_context=True)
-    dp = updater.dispatcher
-    dp.add_handler(CommandHandler("start", start))
-    updater.start_polling()
-    updater.idle()
+dispatcher.add_handler(CommandHandler("start", start))
 
-if __name__ == "__main__":
-    main()
+@app.route(f"/{TOKEN}", methods=["POST"])
+def webhook():
+    update = Update.de_json(request.get_json(force=True), bot)
+    dispatcher.process_update(update)
+    return "ok"
+
+@app.route("/", methods=["GET"])
+def index():
+    return "Bot is running"
+
+# Set webhook (only once, not on every start)
+@app.before_first_request
+def set_webhook():
+    bot.set_webhook(f"https://<your_render_url>/{TOKEN}")
